@@ -1,8 +1,7 @@
-FROM alpine:3.7
+FROM alpine:3.7 as builder
 
 # @arg terraform version
 ARG TERRAFORM_VERSION=0.11.3
-ARG USER=ops
 
 # @run update and upgrade
 RUN apk update && apk upgrade
@@ -13,13 +12,32 @@ RUN apk add python3 python3-dev unzip alpine-sdk libffi-dev openssl-dev && \
 
 # @run install terraform
 RUN curl -L "https://releases.hashicorp.com/terraform/0.11.3/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -o terraform.zip && \
-    unzip terraform.zip && rm terraform.zip && mv terraform /usr/bin
+    unzip terraform.zip && rm terraform.zip
 
 # @run install ansible
 RUN pip3 install ansible
 
-# @run remove build packages
-RUN apk del python3-dev alpine-sdk libffi-dev openssl-dev
+
+
+# @from actual image
+FROM alpine:3.7
+
+# @arg define user
+ARG USER=ops
+
+# @run add python3
+RUN apk add --update python3
+
+# @copy terraform
+COPY --from=builder /terraform /usr/bin/terraform
+
+# @copy ansible
+COPY --from=builder /usr/bin/ansible* /usr/bin/
+
+# @add localhost to ansible hosts
+RUN mkdir /etc/ansible && \
+    echo "[local]" > /etc/ansible/hosts && \
+    echo "localhost     ansible_connection=local" >> /etc/ansible/hosts
 
 # @run add devops user
 RUN adduser -D ${USER}
