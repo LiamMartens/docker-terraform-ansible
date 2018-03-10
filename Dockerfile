@@ -40,5 +40,8 @@ WORKDIR /home/${USER}
 # @volume Define volume
 VOLUME /home/${USER}
 
-# @cmd define sh as defualt command
-CMD [ "/bin/sh" ]
+# @entrypoint define terraform as default entrypoint (ansible should be run from within terraform)
+ENTRYPOINT [ "terraform" ]
+
+# @cmd set help
+CMD [ "--help" ]
