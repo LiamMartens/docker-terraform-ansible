@@ -10,7 +10,7 @@ ARG USER=ops
 RUN apk update && apk upgrade
 
 # @run add unzip
-RUN apk add python3 python3-dev unzip alpine-sdk libffi-dev openssl-dev && \
+RUN apk add python3 ca-certificates python3-dev unzip alpine-sdk libffi-dev openssl-dev && \
     ln -s /usr/bin/python3 /usr/bin/python
 
 # @run install terraform
